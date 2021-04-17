@@ -8,6 +8,7 @@ namespace HauntedHouse
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        private Eyes eyes;
 
         public HauntedHouseGame()
         {
@@ -19,14 +20,20 @@ namespace HauntedHouse
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            var eye_textures = new Texture2D[]{ 
+                Content.Load<Texture2D>("Eyes-Center"),
+                Content.Load<Texture2D>("Eyes-Up"),
+                Content.Load<Texture2D>("Eyes-Down"),
+                Content.Load<Texture2D>("Eyes-Left"),
+                Content.Load<Texture2D>("Eyes-Right"),
+            };
+            eyes = new Eyes(eye_textures, new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), 500f);
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-
             // TODO: use this.Content to load your game content here
         }
 
@@ -36,15 +43,30 @@ namespace HauntedHouse
                 Exit();
 
             // TODO: Add your update logic here
-
-            base.Update(gameTime);
+            var kstate = Keyboard.GetState();
+            //if an arrow key is pushed down, update the eye location and texture
+            eyes.UpdateEyes(kstate, (float)gameTime.ElapsedGameTime.TotalSeconds);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
 
-            // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+
+            _spriteBatch.Draw(
+                eyes.CurrentTexture,
+                eyes.Location,
+                null,
+                Color.White,
+                0f,
+                new Vector2(eyes.CurrentTexture.Width / 2, eyes.CurrentTexture.Height / 2),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
