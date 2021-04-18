@@ -9,6 +9,8 @@ namespace HauntedHouse
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Eyes eyes;
+        private Texture2D logoTexture;
+        private Vector2 logoLocation;
 
         public HauntedHouseGame()
         {
@@ -27,13 +29,16 @@ namespace HauntedHouse
                 Content.Load<Texture2D>("Eyes-Left"),
                 Content.Load<Texture2D>("Eyes-Right"),
             };
+            logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2, 2f);
             eyes = new Eyes(eye_textures, new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), 500f);
+            
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            logoTexture = Content.Load<Texture2D>("logo");
             // TODO: use this.Content to load your game content here
         }
 
@@ -54,6 +59,8 @@ namespace HauntedHouse
 
             _spriteBatch.Begin();
 
+
+
             _spriteBatch.Draw(
                 eyes.CurrentTexture,
                 eyes.Location,
@@ -61,6 +68,18 @@ namespace HauntedHouse
                 Color.White,
                 0f,
                 new Vector2(eyes.CurrentTexture.Width / 2, eyes.CurrentTexture.Height / 2),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+
+            _spriteBatch.Draw(
+                logoTexture,
+                logoLocation,
+                null,
+                Color.White,
+                0f,
+                new Vector2(logoTexture.Width / 2, 0),
                 Vector2.One,
                 SpriteEffects.None,
                 0f
