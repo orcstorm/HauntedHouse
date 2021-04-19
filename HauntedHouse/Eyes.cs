@@ -91,5 +91,11 @@ namespace HauntedHouse
                 MatchLitTick = ticks;
             }
         }
+
+        public Rectangle GetBoundingBox()
+        {
+            return new Rectangle((int)Location.X, (int)Location.Y, CurrentTexture.Width, CurrentTexture.Height);
+        }
+        
     }
 }

@@ -13,6 +13,7 @@ namespace HauntedHouse
         private Texture2D logoTexture;
         private Vector2 logoLocation;
         private Urn urn;
+        private Color backgroundColor;
 
         public HauntedHouseGame()
         {
@@ -23,7 +24,7 @@ namespace HauntedHouse
 
         protected override void Initialize()
         {
-
+            backgroundColor = Color.Black;
             var backgroundBuffer = new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
 
             // Load Eye Textures
@@ -63,18 +64,29 @@ namespace HauntedHouse
 
         protected override void Update(GameTime gameTime)
         {
+
+            //Check that all three pieces are found, end game
+            if(urn.UrnCenterIsFound && urn.UrnHandleLIsFound && urn.UrnHandleRIsFound)
+            {
+                backgroundColor = Color.CornflowerBlue;
+            }
+
             var kstate = Keyboard.GetState();
             if(kstate.IsKeyDown(Keys.LeftControl) && kstate.IsKeyDown(Keys.Q))
             {
                 Exit();
             }
-            //if an arrow key is pushed down, update the eye location and texture
+
+            //check for collisions between eyes and urn pieces
+            urn.CheckCollisions(eyes.GetBoundingBox());
+
+            //update the eye location and texture
             eyes.UpdateEyes(kstate, gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(backgroundColor);
 
             _spriteBatch.Begin();
 
@@ -107,41 +119,50 @@ namespace HauntedHouse
             );
 
             //Draw the Urn Pieces
-            _spriteBatch.Draw(
-                urn.UrnCenterTexture,
-                urn.UrnCenterLocation,
-                null,
-                Color.White,
-                0f,
-                new Vector2(urn.UrnCenterTexture.Width / 2f, urn.UrnCenterTexture.Height / 2f),
-                Vector2.One,
-                SpriteEffects.None,
-                0f
-            );
+            if (urn.UrnCenterIsFound == false)
+            {
+                _spriteBatch.Draw(
+                    urn.UrnCenterTexture,
+                    urn.UrnCenterLocation,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(urn.UrnCenterTexture.Width / 2f, urn.UrnCenterTexture.Height / 2f),
+                    Vector2.One,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
 
-            _spriteBatch.Draw(
-                urn.UrnHandleLTexture,
-                urn.UrnHandleLLocation,
-                null,
-                Color.White,
-                0f,
-                new Vector2(urn.UrnHandleLTexture.Width / 2f, urn.UrnHandleLTexture.Height / 2f),
-                Vector2.One,
-                SpriteEffects.None,
-                0f
-            );
+            if (urn.UrnHandleLIsFound == false)
+            {
+                _spriteBatch.Draw(
+                    urn.UrnHandleLTexture,
+                    urn.UrnHandleLLocation,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(urn.UrnHandleLTexture.Width / 2f, urn.UrnHandleLTexture.Height / 2f),
+                    Vector2.One,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
 
-            _spriteBatch.Draw(
-                urn.UrnHandleRTexture,
-                urn.UrnHandleRLocation,
-                null,
-                Color.White,
-                0f,
-                new Vector2(urn.UrnHandleRTexture.Width / 2f, urn.UrnHandleRTexture.Height / 2f),
-                Vector2.One,
-                SpriteEffects.None,
-                0f
-            );
+            if (urn.UrnHandleRIsFound == false)
+            {
+                _spriteBatch.Draw(
+                    urn.UrnHandleRTexture,
+                    urn.UrnHandleRLocation,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(urn.UrnHandleRTexture.Width / 2f, urn.UrnHandleRTexture.Height / 2f),
+                    Vector2.One,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
 
             /*
             //Draw the logo
