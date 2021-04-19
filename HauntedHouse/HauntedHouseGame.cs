@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace HauntedHouse
 {
@@ -28,6 +29,7 @@ namespace HauntedHouse
                 Content.Load<Texture2D>("Eyes-Down"),
                 Content.Load<Texture2D>("Eyes-Left"),
                 Content.Load<Texture2D>("Eyes-Right"),
+                Content.Load<Texture2D>("Match")
             };
             logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2, 2f);
             eyes = new Eyes(eye_textures, new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), 500f);
@@ -39,18 +41,17 @@ namespace HauntedHouse
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             logoTexture = Content.Load<Texture2D>("logo");
-            // TODO: use this.Content to load your game content here
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
             var kstate = Keyboard.GetState();
+            if(kstate.IsKeyDown(Keys.LeftControl) && kstate.IsKeyDown(Keys.Q))
+            {
+                Exit();
+            }
             //if an arrow key is pushed down, update the eye location and texture
-            eyes.UpdateEyes(kstate, (float)gameTime.ElapsedGameTime.TotalSeconds);
+            eyes.UpdateEyes(kstate, gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -59,7 +60,19 @@ namespace HauntedHouse
 
             _spriteBatch.Begin();
 
-
+            if(eyes.MatchIsLit == true)
+            {
+                _spriteBatch.Draw(
+                    eyes.MatchTexture,
+                    eyes.Location,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(eyes.MatchTexture.Width / 2, eyes.MatchTexture.Height / 2),
+                    Vector2.One,
+                    SpriteEffects.None,
+                    0f);
+            }
 
             _spriteBatch.Draw(
                 eyes.CurrentTexture,
@@ -79,7 +92,7 @@ namespace HauntedHouse
                 null,
                 Color.White,
                 0f,
-                new Vector2(logoTexture.Width / 2, 0),
+                new Vector2(logoTexture.Width / 2f, 0),
                 Vector2.One,
                 SpriteEffects.None,
                 0f

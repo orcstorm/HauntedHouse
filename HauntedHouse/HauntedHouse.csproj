@@ -11,6 +11,7 @@
     <Version>0.0.1</Version>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Content\quit.png" />
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
   </ItemGroup>
