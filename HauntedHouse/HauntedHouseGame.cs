@@ -12,6 +12,7 @@ namespace HauntedHouse
         private Eyes eyes;
         private Texture2D logoTexture;
         private Vector2 logoLocation;
+        private Urn urn;
 
         public HauntedHouseGame()
         {
@@ -22,7 +23,10 @@ namespace HauntedHouse
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+
+            var backgroundBuffer = new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+
+            // Load Eye Textures
             var eye_textures = new Texture2D[]{ 
                 Content.Load<Texture2D>("Eyes-Center"),
                 Content.Load<Texture2D>("Eyes-Up"),
@@ -31,8 +35,22 @@ namespace HauntedHouse
                 Content.Load<Texture2D>("Eyes-Right"),
                 Content.Load<Texture2D>("Match")
             };
+
+            //Create Eyes object
+            eyes = new Eyes(eye_textures, backgroundBuffer, 500f);
+            
+            //Load Urn Textures
+            var urnTextures = new Texture2D[]
+            {
+                Content.Load<Texture2D>("Urn-Handle-L"),
+                Content.Load<Texture2D>("Urn-C"),
+                Content.Load<Texture2D>("Urn-Handle-R")
+            };
+
+            //Create and Urn Object
+            urn = new Urn(backgroundBuffer, urnTextures); 
             logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2, 2f);
-            eyes = new Eyes(eye_textures, new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), 500f);
+            
             
             base.Initialize();
         }
@@ -60,6 +78,7 @@ namespace HauntedHouse
 
             _spriteBatch.Begin();
 
+            //Draw the Match if lit
             if(eyes.MatchIsLit == true)
             {
                 _spriteBatch.Draw(
@@ -74,6 +93,7 @@ namespace HauntedHouse
                     0f);
             }
 
+            //Draw the eyes
             _spriteBatch.Draw(
                 eyes.CurrentTexture,
                 eyes.Location,
@@ -86,6 +106,45 @@ namespace HauntedHouse
                 0f
             );
 
+            //Draw the Urn Pieces
+            _spriteBatch.Draw(
+                urn.UrnCenterTexture,
+                urn.UrnCenterLocation,
+                null,
+                Color.White,
+                0f,
+                new Vector2(urn.UrnCenterTexture.Width / 2f, urn.UrnCenterTexture.Height / 2f),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+
+            _spriteBatch.Draw(
+                urn.UrnHandleLTexture,
+                urn.UrnHandleLLocation,
+                null,
+                Color.White,
+                0f,
+                new Vector2(urn.UrnHandleLTexture.Width / 2f, urn.UrnHandleLTexture.Height / 2f),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+
+            _spriteBatch.Draw(
+                urn.UrnHandleRTexture,
+                urn.UrnHandleRLocation,
+                null,
+                Color.White,
+                0f,
+                new Vector2(urn.UrnHandleRTexture.Width / 2f, urn.UrnHandleRTexture.Height / 2f),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+
+            /*
+            //Draw the logo
             _spriteBatch.Draw(
                 logoTexture,
                 logoLocation,
@@ -96,7 +155,7 @@ namespace HauntedHouse
                 Vector2.One,
                 SpriteEffects.None,
                 0f
-            );
+            );*/
 
             _spriteBatch.End();
 
