@@ -33,6 +33,18 @@ namespace HauntedHouse
             SetUrnLocations();
         }
 
+        private void SetUrnLocations()
+        {
+            UrnHandleLLocation = RandomPoint();
+            UrnHandleRLocation = RandomPoint();
+            UrnCenterLocation = RandomPoint();
+        }
+
+        private Vector2 RandomPoint()
+        {
+            return new Vector2((float)random.NextDouble() * BackgroundBuffer.X, (float)random.NextDouble() * BackgroundBuffer.Y);
+        }
+
         public void CheckCollisions(Rectangle eyeBox)
         {
             if(IsColliding(GetBoundingBox(UrnCenterLocation, UrnCenterTexture), eyeBox) == true) {
@@ -50,23 +62,6 @@ namespace HauntedHouse
             }
         }
 
-        private void SetUrnLocations()
-        {
-            UrnHandleLLocation = RandomPoint();
-            UrnHandleRLocation = RandomPoint();
-            UrnCenterLocation = RandomPoint();
-        }
-
-        private Vector2 RandomPoint()
-        {
-            return new Vector2((float)random.NextDouble() * BackgroundBuffer.X, (float)random.NextDouble() * BackgroundBuffer.Y);
-        }
-
-        private Rectangle GetBoundingBox(Vector2 vector, Texture2D texture)
-        {
-           return new Rectangle((int)vector.X, (int)vector.Y, texture.Width, texture.Height);
-        }
-
         private bool IsColliding(Rectangle boxA, Rectangle boxB)
         {
             return boxA.Left < boxB.Right &&
@@ -74,5 +69,11 @@ namespace HauntedHouse
             boxA.Top < boxB.Bottom &&
             boxA.Bottom > boxB.Top;
         }
+
+        private Rectangle GetBoundingBox(Vector2 vector, Texture2D texture)
+        {
+           return new Rectangle((int)vector.X, (int)vector.Y, texture.Width, texture.Height);
+        }
+
     }
 }

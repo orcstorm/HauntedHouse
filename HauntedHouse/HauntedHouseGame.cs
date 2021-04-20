@@ -14,6 +14,8 @@ namespace HauntedHouse
         private Vector2 logoLocation;
         private Urn urn;
         private Color backgroundColor;
+        private enum GameStates { Menu, Active }
+        private GameStates gameState;
 
         public HauntedHouseGame()
         {
@@ -51,7 +53,8 @@ namespace HauntedHouse
             //Create and Urn Object
             urn = new Urn(backgroundBuffer, urnTextures); 
             logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
-            
+
+            gameState = GameStates.Menu;
             
             base.Initialize();
         }
@@ -64,24 +67,40 @@ namespace HauntedHouse
 
         protected override void Update(GameTime gameTime)
         {
-
-            //Check that all three pieces are found, end game
-            if(urn.UrnCenterIsFound && urn.UrnHandleLIsFound && urn.UrnHandleRIsFound)
-            {
-                backgroundColor = Color.CornflowerBlue;
-            }
-
             var kstate = Keyboard.GetState();
-            if(kstate.IsKeyDown(Keys.LeftControl) && kstate.IsKeyDown(Keys.Q))
+
+            switch (gameState)
             {
-                Exit();
+                case GameStates.Menu:
+                    if(kstate.IsKeyDown(Keys.Enter))
+                    {
+                        gameState = GameStates.Active;
+                    }
+                    break;
+                case GameStates.Active:
+                    //Check that all three pieces are found, end game
+                    if (urn.UrnCenterIsFound && urn.UrnHandleLIsFound && urn.UrnHandleRIsFound)
+                    {
+                        backgroundColor = Color.CornflowerBlue;
+                        Initialize();
+                        gameState = GameStates.Menu;
+                    }
+
+
+                    if (kstate.IsKeyDown(Keys.Escape))
+                    {
+                        Exit();
+                    }
+
+                    //check for collisions between eyes and urn pieces
+                    urn.CheckCollisions(eyes.GetBoundingBox());
+
+                    //update the eye location and texture
+                    eyes.UpdateEyes(kstate, gameTime);
+                    break;
             }
 
-            //check for collisions between eyes and urn pieces
-            urn.CheckCollisions(eyes.GetBoundingBox());
 
-            //update the eye location and texture
-            eyes.UpdateEyes(kstate, gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -89,9 +108,42 @@ namespace HauntedHouse
             GraphicsDevice.Clear(backgroundColor);
 
             _spriteBatch.Begin();
+            
+            switch(gameState)
+            {
+                case GameStates.Menu:
+                    DrawMenu(gameTime);
+                    break;
+                case GameStates.Active:
+                    DrawGame(gameTime);
+                    break;
+            }
 
-            //Draw the Match if lit
-            if(eyes.MatchIsLit == true)
+            _spriteBatch.End();
+
+            base.Draw(gameTime);
+        }
+
+        private void DrawMenu(GameTime gameTime)
+        {
+            //Draw the logo
+            _spriteBatch.Draw(
+                logoTexture,
+                logoLocation,
+                null,
+                Color.White,
+                0f,
+                new Vector2(logoTexture.Width / 2f, logoTexture.Height / 2f),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+        }
+
+        private void DrawGame(GameTime game)
+        {
+            backgroundColor = Color.Black;
+            if (eyes.MatchIsLit == true)
             {
                 _spriteBatch.Draw(
                     eyes.MatchTexture,
@@ -163,24 +215,11 @@ namespace HauntedHouse
                     0f
                 );
             }
+        }
 
-            
-            //Draw the logo
-            _spriteBatch.Draw(
-                logoTexture,
-                logoLocation,
-                null,
-                Color.White,
-                0f,
-                new Vector2(logoTexture.Width / 2f, logoTexture.Height / 2f),
-                Vector2.One,
-                SpriteEffects.None,
-                0f
-            );
+        private void Reset()
+        {
 
-            _spriteBatch.End();
-
-            base.Draw(gameTime);
         }
     }
 }
