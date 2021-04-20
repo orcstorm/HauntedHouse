@@ -50,7 +50,7 @@ namespace HauntedHouse
 
             //Create and Urn Object
             urn = new Urn(backgroundBuffer, urnTextures); 
-            logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2, 2f);
+            logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
             
             
             base.Initialize();
@@ -59,7 +59,7 @@ namespace HauntedHouse
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            logoTexture = Content.Load<Texture2D>("logo");
+            logoTexture = Content.Load<Texture2D>("Text");
         }
 
         protected override void Update(GameTime gameTime)
@@ -164,7 +164,7 @@ namespace HauntedHouse
                 );
             }
 
-            /*
+            
             //Draw the logo
             _spriteBatch.Draw(
                 logoTexture,
@@ -172,11 +172,11 @@ namespace HauntedHouse
                 null,
                 Color.White,
                 0f,
-                new Vector2(logoTexture.Width / 2f, 0),
+                new Vector2(logoTexture.Width / 2f, logoTexture.Height / 2f),
                 Vector2.One,
                 SpriteEffects.None,
                 0f
-            );*/
+            );
 
             _spriteBatch.End();
 
