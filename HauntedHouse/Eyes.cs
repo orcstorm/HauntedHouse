@@ -16,6 +16,7 @@ namespace HauntedHouse
         public bool MatchIsLit;
         public long MatchLitTick;
         public long MatchLitDuration = 20000000;
+        public Circle lightCircle;
 
         public Eyes(Texture2D[] textures, Vector2 location, float speed)
         {
@@ -95,6 +96,11 @@ namespace HauntedHouse
         public Rectangle GetBoundingBox()
         {
             return new Rectangle((int)Location.X, (int)Location.Y, CurrentTexture.Width, CurrentTexture.Height);
+        }
+
+        public Circle GetBoundingCircle()
+        {
+            return new Circle((int)Location.X, (int)Location.Y, (int)MatchTexture.Width / 2);
         }
         
     }

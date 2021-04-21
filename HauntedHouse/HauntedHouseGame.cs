@@ -14,8 +14,10 @@ namespace HauntedHouse
         private Vector2 logoLocation;
         private Urn urn;
         private Color backgroundColor;
-        private enum GameStates { Menu, Active }
+        private enum GameStates { Menu, Active, Paused }
         private GameStates gameState;
+        private Vector2 pauseLocation;
+        private Texture2D pauseTexture;
 
         public HauntedHouseGame()
         {
@@ -50,10 +52,11 @@ namespace HauntedHouse
                 Content.Load<Texture2D>("Urn-Handle-R")
             };
 
-            //Create and Urn Object
+            //Create Urn Object
             urn = new Urn(backgroundBuffer, urnTextures); 
+            
             logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
-
+            pauseLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
             gameState = GameStates.Menu;
             
             base.Initialize();
@@ -63,6 +66,7 @@ namespace HauntedHouse
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             logoTexture = Content.Load<Texture2D>("Text");
+            pauseTexture = Content.Load<Texture2D>("Pause");
         }
 
         protected override void Update(GameTime gameTime)
@@ -79,9 +83,10 @@ namespace HauntedHouse
                     break;
                 case GameStates.Active:
                     //Check that all three pieces are found, end game
+                    backgroundColor = Color.Black;
+
                     if (urn.UrnCenterIsFound && urn.UrnHandleLIsFound && urn.UrnHandleRIsFound)
                     {
-                        backgroundColor = Color.CornflowerBlue;
                         Initialize();
                         gameState = GameStates.Menu;
                     }
@@ -89,14 +94,20 @@ namespace HauntedHouse
 
                     if (kstate.IsKeyDown(Keys.Escape))
                     {
-                        Exit();
+                        gameState = GameStates.Paused;
                     }
 
                     //check for collisions between eyes and urn pieces
-                    urn.CheckCollisions(eyes.GetBoundingBox());
+                    urn.CheckCollisions(eyes);
 
                     //update the eye location and texture
                     eyes.UpdateEyes(kstate, gameTime);
+                    break;
+                case GameStates.Paused:
+                    if (kstate.IsKeyDown(Keys.Escape))
+                    {
+                        gameState = GameStates.Active;
+                    }
                     break;
             }
 
@@ -116,6 +127,9 @@ namespace HauntedHouse
                     break;
                 case GameStates.Active:
                     DrawGame(gameTime);
+                    break;
+                case GameStates.Paused:
+                    DrawPaused(gameTime);
                     break;
             }
 
@@ -140,9 +154,26 @@ namespace HauntedHouse
             );
         }
 
+        private void DrawPaused(GameTime gameTime)
+        {
+            _spriteBatch.Draw(
+                pauseTexture,
+                pauseLocation,
+                null,
+                Color.White,
+                0f,
+                new Vector2(pauseTexture.Width / 2f, pauseTexture.Height / 2f),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+
+        }
+
         private void DrawGame(GameTime game)
         {
-            backgroundColor = Color.Black;
+           
+            
             if (eyes.MatchIsLit == true)
             {
                 _spriteBatch.Draw(
@@ -167,59 +198,68 @@ namespace HauntedHouse
                 new Vector2(eyes.CurrentTexture.Width / 2, eyes.CurrentTexture.Height / 2),
                 Vector2.One,
                 SpriteEffects.None,
-                0f
-            );
+                0f);
 
             //Draw the Urn Pieces
-            if (urn.UrnCenterIsFound == false)
+            if (eyes.MatchIsLit == true)
             {
-                _spriteBatch.Draw(
-                    urn.UrnCenterTexture,
-                    urn.UrnCenterLocation,
-                    null,
-                    Color.White,
-                    0f,
-                    new Vector2(urn.UrnCenterTexture.Width / 2f, urn.UrnCenterTexture.Height / 2f),
-                    Vector2.One,
-                    SpriteEffects.None,
-                    0f
-                );
+                
+                if (urn.UrnCenterIsFound == false)
+                {
+                    if(urn.IsCenterLit(eyes.GetBoundingCircle())) {
+                        _spriteBatch.Draw(
+                            urn.UrnCenterTexture,
+                            urn.UrnCenterLocation,
+                            null,
+                            Color.White,
+                            0f,
+                            new Vector2(urn.UrnCenterTexture.Width / 2f, urn.UrnCenterTexture.Height / 2f),
+                            Vector2.One,
+                            SpriteEffects.None,
+                            0f
+                        );
+                    }
+
+                }
+
+                if (urn.UrnHandleLIsFound == false)
+                {
+                    if (urn.IsLeftLit(eyes.GetBoundingCircle()))
+                    {
+                        _spriteBatch.Draw(
+                            urn.UrnHandleLTexture,
+                            urn.UrnHandleLLocation,
+                            null,
+                            Color.White,
+                            0f,
+                            new Vector2(urn.UrnHandleLTexture.Width / 2f, urn.UrnHandleLTexture.Height / 2f),
+                            Vector2.One,
+                            SpriteEffects.None,
+                            0f
+                        );
+                    }
+                }
+
+                if (urn.UrnHandleRIsFound == false)
+                {
+                    if (urn.IsRightLit(eyes.GetBoundingCircle()))
+                    {
+                        _spriteBatch.Draw(
+                            urn.UrnHandleRTexture,
+                            urn.UrnHandleRLocation,
+                            null,
+                            Color.White,
+                            0f,
+                            new Vector2(urn.UrnHandleRTexture.Width / 2f, urn.UrnHandleRTexture.Height / 2f),
+                            Vector2.One,
+                            SpriteEffects.None,
+                            0f
+                        );
+                    }
+                }
             }
 
-            if (urn.UrnHandleLIsFound == false)
-            {
-                _spriteBatch.Draw(
-                    urn.UrnHandleLTexture,
-                    urn.UrnHandleLLocation,
-                    null,
-                    Color.White,
-                    0f,
-                    new Vector2(urn.UrnHandleLTexture.Width / 2f, urn.UrnHandleLTexture.Height / 2f),
-                    Vector2.One,
-                    SpriteEffects.None,
-                    0f
-                );
-            }
-
-            if (urn.UrnHandleRIsFound == false)
-            {
-                _spriteBatch.Draw(
-                    urn.UrnHandleRTexture,
-                    urn.UrnHandleRLocation,
-                    null,
-                    Color.White,
-                    0f,
-                    new Vector2(urn.UrnHandleRTexture.Width / 2f, urn.UrnHandleRTexture.Height / 2f),
-                    Vector2.One,
-                    SpriteEffects.None,
-                    0f
-                );
-            }
         }
 
-        private void Reset()
-        {
-
-        }
     }
 }

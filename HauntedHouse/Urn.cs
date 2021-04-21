@@ -45,18 +45,20 @@ namespace HauntedHouse
             return new Vector2((float)random.NextDouble() * BackgroundBuffer.X, (float)random.NextDouble() * BackgroundBuffer.Y);
         }
 
-        public void CheckCollisions(Rectangle eyeBox)
+        public void CheckCollisions(Eyes eyes)
         {
-            if(IsColliding(GetBoundingBox(UrnCenterLocation, UrnCenterTexture), eyeBox) == true) {
+            var eyeBox = eyes.GetBoundingBox();
+
+            if(IsColliding(GetBoundingBox(UrnCenterLocation, UrnCenterTexture), eyeBox) == true && eyes.MatchIsLit == true) {
                 UrnCenterIsFound = true;
             }
 
-            if(IsColliding(GetBoundingBox(UrnHandleLLocation, UrnHandleLTexture), eyeBox) == true)
+            if(IsColliding(GetBoundingBox(UrnHandleLLocation, UrnHandleLTexture), eyeBox) == true && eyes.MatchIsLit == true)
             {
                 UrnHandleLIsFound = true;
             }
 
-            if (IsColliding(GetBoundingBox(UrnHandleRLocation, UrnHandleRTexture), eyeBox) == true)
+            if (IsColliding(GetBoundingBox(UrnHandleRLocation, UrnHandleRTexture), eyeBox) == true && eyes.MatchIsLit == true)
             {
                 UrnHandleRIsFound = true;
             }
@@ -73,6 +75,62 @@ namespace HauntedHouse
         private Rectangle GetBoundingBox(Vector2 vector, Texture2D texture)
         {
            return new Rectangle((int)vector.X, (int)vector.Y, texture.Width, texture.Height);
+        }
+
+        public bool IsCenterLit(Circle circle)
+        {
+            var rectangle = GetBoundingBox(UrnCenterLocation, UrnCenterTexture);
+            return DoRectangleCircleOverlap(circle, rectangle);
+        }
+
+        public bool IsLeftLit(Circle circle)
+        {
+            var rectangle = GetBoundingBox(UrnHandleLLocation, UrnHandleLTexture);
+            return DoRectangleCircleOverlap(circle, rectangle);
+        }
+
+        public bool IsRightLit(Circle circle)
+        {
+            var rectangle = GetBoundingBox(UrnHandleRLocation, UrnHandleRTexture);
+            return DoRectangleCircleOverlap(circle, rectangle);
+        }
+        private static bool DoRectangleCircleOverlap(Circle cir, Rectangle rect)
+        {
+
+            // Get the rectangle half width and height
+            float rW = (rect.Width) / 2;
+            float rH = (rect.Height) / 2;
+
+            // Get the positive distance. This exploits the symmetry so that we now are
+            // just solving for one corner of the rectangle (memory tell me it fabs for 
+            // floats but I could be wrong and its abs)
+            float distX = Math.Abs(cir.Center.X - (rect.Left + rW));
+            float distY = Math.Abs(cir.Center.Y - (rect.Top + rH));
+
+            if (distX >= cir.Radius + rW || distY >= cir.Radius + rH)
+            {
+                // Outside see diagram circle E
+                return false;
+            }
+            if (distX < rW || distY < rH)
+            {
+                // Inside see diagram circles A and B
+                return true; // touching
+            }
+
+            // Now only circles C and D left to test
+            // get the distance to the corner
+            distX -= rW;
+            distY -= rH;
+
+            // Find distance to corner and compare to circle radius 
+            // (squared and the sqrt root is not needed
+            if (distX * distX + distY * distY < cir.Radius * cir.Radius)
+            {
+                // Touching see diagram circle C
+                return true;
+            }
+            return false;
         }
 
     }
