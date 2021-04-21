@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -17,9 +18,10 @@ namespace HauntedHouse
         public Vector2 UrnCenterLocation;
         public Vector2 BackgroundBuffer;
         public Texture2D[] UrnTextures;
-        private Random random; 
+        private Random random;
+        private SoundEffect found;
 
-        public Urn(Vector2 BackgroundBuffer, Texture2D[] UrnTextures)
+        public Urn(Vector2 BackgroundBuffer, Texture2D[] UrnTextures, SoundEffect found)
         {
             random = new Random();
             this.BackgroundBuffer = BackgroundBuffer;
@@ -30,6 +32,7 @@ namespace HauntedHouse
             UrnHandleLTexture = UrnTextures[0];
             UrnCenterTexture = UrnTextures[1];
             UrnHandleRTexture = UrnTextures[2];
+            this.found = found;
             SetUrnLocations();
         }
 
@@ -49,17 +52,20 @@ namespace HauntedHouse
         {
             var eyeBox = eyes.GetBoundingBox();
 
-            if(IsColliding(GetBoundingBox(UrnCenterLocation, UrnCenterTexture), eyeBox) == true && eyes.MatchIsLit == true) {
+            if(UrnCenterIsFound == false && IsColliding(GetBoundingBox(UrnCenterLocation, UrnCenterTexture), eyeBox) == true && eyes.MatchIsLit == true) {
+                found.Play();
                 UrnCenterIsFound = true;
             }
 
-            if(IsColliding(GetBoundingBox(UrnHandleLLocation, UrnHandleLTexture), eyeBox) == true && eyes.MatchIsLit == true)
+            if(UrnHandleLIsFound == false && IsColliding(GetBoundingBox(UrnHandleLLocation, UrnHandleLTexture), eyeBox) == true && eyes.MatchIsLit == true)
             {
+                found.Play();
                 UrnHandleLIsFound = true;
             }
 
-            if (IsColliding(GetBoundingBox(UrnHandleRLocation, UrnHandleRTexture), eyeBox) == true && eyes.MatchIsLit == true)
+            if (UrnHandleRIsFound == false && IsColliding(GetBoundingBox(UrnHandleRLocation, UrnHandleRTexture), eyeBox) == true && eyes.MatchIsLit == true)
             {
+                found.Play();
                 UrnHandleRIsFound = true;
             }
         }

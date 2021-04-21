@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System.Diagnostics;
 
 namespace HauntedHouse
@@ -18,6 +20,7 @@ namespace HauntedHouse
         private GameStates gameState;
         private Vector2 pauseLocation;
         private Texture2D pauseTexture;
+        private Song song;
 
         public HauntedHouseGame()
         {
@@ -53,7 +56,7 @@ namespace HauntedHouse
             };
 
             //Create Urn Object
-            urn = new Urn(backgroundBuffer, urnTextures); 
+            urn = new Urn(backgroundBuffer, urnTextures, Content.Load<SoundEffect>("audio/Found")); 
             
             logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
             pauseLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
@@ -67,6 +70,8 @@ namespace HauntedHouse
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             logoTexture = Content.Load<Texture2D>("Text");
             pauseTexture = Content.Load<Texture2D>("Pause");
+            song = Content.Load<Song>("audio/SquareBass");
+            MediaPlayer.IsRepeating = true; 
         }
 
         protected override void Update(GameTime gameTime)
@@ -78,6 +83,7 @@ namespace HauntedHouse
                 case GameStates.Menu:
                     if(kstate.IsKeyDown(Keys.Enter))
                     {
+                        MediaPlayer.Play(song);
                         gameState = GameStates.Active;
                     }
                     break;
@@ -87,8 +93,9 @@ namespace HauntedHouse
 
                     if (urn.UrnCenterIsFound && urn.UrnHandleLIsFound && urn.UrnHandleRIsFound)
                     {
+                        MediaPlayer.Stop(); 
                         Initialize();
-                        gameState = GameStates.Menu;
+                        gameState = GameStates.Menu;  
                     }
 
 
@@ -107,6 +114,11 @@ namespace HauntedHouse
                     if (kstate.IsKeyDown(Keys.Escape))
                     {
                         gameState = GameStates.Active;
+                    }
+
+                    if (kstate.IsKeyDown(Keys.Q))
+                    {
+                        Exit();
                     }
                     break;
             }

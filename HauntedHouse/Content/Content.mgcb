@@ -13,6 +13,18 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin audio/Found.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/Found.wav
+
+#begin audio/SquareBass.wav
+/importer:WavImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:audio/SquareBass.wav
+
 #begin Eyes-Center.png
 /importer:TextureImporter
 /processor:TextureProcessor
