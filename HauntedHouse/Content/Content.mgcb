@@ -19,9 +19,27 @@
 /processorParam:Quality=Best
 /build:audio/Found.wav
 
+#begin audio/SB2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/SB2.wav
+
+#begin audio/SB3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/SB3.wav
+
+#begin audio/SB4.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:audio/SB4.wav
+
 #begin audio/SquareBass.wav
 /importer:WavImporter
-/processor:SongProcessor
+/processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:audio/SquareBass.wav
 
@@ -156,4 +174,16 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Urn-Handle-R.png
+
+#begin walls/vertical-wall.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:walls/vertical-wall.png
 

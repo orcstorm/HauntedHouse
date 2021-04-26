@@ -20,7 +20,13 @@ namespace HauntedHouse
         private GameStates gameState;
         private Vector2 pauseLocation;
         private Texture2D pauseTexture;
-        private Song song;
+        private SoundEffectInstance soundEffectInstance;
+        private SoundEffectInstance soundEffectInstance2;
+        private SoundEffectInstance soundEffectInstance3;
+        private SoundEffectInstance soundEffectInstance4;
+        private SoundEffectInstance currentSoundEffect;
+        private Room room;
+
 
         public HauntedHouseGame()
         {
@@ -46,6 +52,10 @@ namespace HauntedHouse
 
             //Create Eyes object
             eyes = new Eyes(eye_textures, backgroundBuffer, 500f);
+
+            //create a Room;
+            room = new Room(backgroundBuffer);
+            room.AddWall(new Vector2(backgroundBuffer.X / 2f, backgroundBuffer.Y / 2f), Content.Load<Texture2D>("walls/vertical-wall"));
             
             //Load Urn Textures
             var urnTextures = new Texture2D[]
@@ -61,7 +71,6 @@ namespace HauntedHouse
             logoLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
             pauseLocation = new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f);
             gameState = GameStates.Menu;
-            
             base.Initialize();
         }
 
@@ -70,26 +79,58 @@ namespace HauntedHouse
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             logoTexture = Content.Load<Texture2D>("Text");
             pauseTexture = Content.Load<Texture2D>("Pause");
-            song = Content.Load<Song>("audio/SquareBass");
+            soundEffectInstance = Content.Load<SoundEffect>("audio/SquareBass").CreateInstance();
+            soundEffectInstance2 = Content.Load<SoundEffect>("audio/SB2").CreateInstance();
+            soundEffectInstance3 = Content.Load<SoundEffect>("audio/SB3").CreateInstance();
+            soundEffectInstance4 = Content.Load<SoundEffect>("audio/SB4").CreateInstance();
+            currentSoundEffect = soundEffectInstance;
             MediaPlayer.IsRepeating = true; 
         }
 
         protected override void Update(GameTime gameTime)
         {
+
             var kstate = Keyboard.GetState();
+            var piecesFound = urn.PiecesFound();
 
             switch (gameState)
             {
                 case GameStates.Menu:
                     if(kstate.IsKeyDown(Keys.Enter))
                     {
-                        MediaPlayer.Play(song);
+                        
                         gameState = GameStates.Active;
                     }
                     break;
                 case GameStates.Active:
-                    //Check that all three pieces are found, end game
+                    
                     backgroundColor = Color.Black;
+                    
+                    //play an audio effect based on how many pieces have been found
+                    if(currentSoundEffect.State == SoundState.Stopped)
+                    {
+                       
+                        switch (piecesFound)
+                        {
+                            case 0:
+                           
+                                currentSoundEffect.Play();
+                                break;
+                            case 1:
+                                currentSoundEffect = soundEffectInstance2;
+                                currentSoundEffect.Play();
+                                break;
+                            case 2:
+                                currentSoundEffect = soundEffectInstance3;
+                                currentSoundEffect.Play();
+                                break;
+                            case 3:
+                                currentSoundEffect = soundEffectInstance4;
+                                currentSoundEffect.Play();
+                                break;
+                        }
+                    }
+
 
                     if (urn.UrnCenterIsFound && urn.UrnHandleLIsFound && urn.UrnHandleRIsFound)
                     {
@@ -108,7 +149,8 @@ namespace HauntedHouse
                     urn.CheckCollisions(eyes);
 
                     //update the eye location and texture
-                    eyes.UpdateEyes(kstate, gameTime);
+                    UpdateEyes(gameTime, kstate);
+
                     break;
                 case GameStates.Paused:
                     if (kstate.IsKeyDown(Keys.Escape))
@@ -184,8 +226,8 @@ namespace HauntedHouse
 
         private void DrawGame(GameTime game)
         {
-           
-            
+
+            //Draw the match light circle if lit. 
             if (eyes.MatchIsLit == true)
             {
                 _spriteBatch.Draw(
@@ -199,6 +241,9 @@ namespace HauntedHouse
                     SpriteEffects.None,
                     0f);
             }
+
+            //Draw the walls
+            DrawWalls();
 
             //Draw the eyes
             _spriteBatch.Draw(
@@ -273,5 +318,89 @@ namespace HauntedHouse
 
         }
 
+        private void DrawWalls()
+        {
+            foreach(Wall wall in room.walls)
+            {
+                _spriteBatch.Draw(
+                    wall.texture,
+                    wall.location,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(wall.texture.Width / 2f, wall.texture.Height / 2f),
+                    Vector2.One,
+                    SpriteEffects.None,
+                    0f);
+            }
+        }
+
+        private void UpdateEyes(GameTime gameTime, KeyboardState kstate)
+        {
+            var seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            var ticks = gameTime.TotalGameTime.Ticks;
+
+            //check if the match should be extinguished
+            if (ticks > eyes.MatchLitTick + eyes.MatchLitDuration)
+            {
+                eyes.MatchIsLit = false;
+            }
+
+            //check direction keys
+            if (kstate.IsKeyDown(Keys.Up))
+            {
+                eyes.CurrentTexture = eyes.Textures[1];
+                if (eyes.Location.Y - eyes.CurrentTexture.Height > 0)
+                {
+                    eyes.Location.Y -= eyes.Speed * seconds;
+                }
+            }
+            else if (kstate.IsKeyDown(Keys.Down))
+            {
+                eyes.CurrentTexture = eyes.Textures[2];
+                if (eyes.Location.Y + eyes.CurrentTexture.Height < eyes.BackgroundBuffer.Y)
+                {
+                    eyes.Location.Y += eyes.Speed * seconds;
+                }
+
+            }
+            else if (kstate.IsKeyDown(Keys.Left))
+            {
+                eyes.CurrentTexture = eyes.Textures[3];
+                if (eyes.Location.X - eyes.CurrentTexture.Width / 2f > 0)
+                {
+                    eyes.Location.X -= eyes.Speed * seconds;
+                }
+                else
+                {
+                    eyes.Location.X = 0 + eyes.CurrentTexture.Width / 2f;
+                }
+            }
+            else if (kstate.IsKeyDown(Keys.Right))
+            {
+                eyes.CurrentTexture = eyes.Textures[4];
+                if (eyes.Location.X + eyes.CurrentTexture.Width / 2f < eyes.BackgroundBuffer.X)
+                {
+                    eyes.Location.X += eyes.Speed * seconds;
+                }
+                else
+                {
+                    eyes.Location.X = eyes.BackgroundBuffer.X - eyes.CurrentTexture.Width / 2f;
+                }
+            }
+            else
+            {
+                eyes.CurrentTexture = eyes.Textures[0];
+            }
+
+            if (kstate.IsKeyDown(Keys.Space) && eyes.MatchIsLit == false)
+            {
+                eyes.MatchIsLit = true;
+                eyes.MatchLitTick = ticks;
+            }
+        }
+
     }
+
+
 }

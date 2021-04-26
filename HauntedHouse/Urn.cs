@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Diagnostics;
 
 namespace HauntedHouse
 {
@@ -38,14 +39,33 @@ namespace HauntedHouse
 
         private void SetUrnLocations()
         {
-            UrnHandleLLocation = RandomPoint();
-            UrnHandleRLocation = RandomPoint();
-            UrnCenterLocation = RandomPoint();
+            UrnHandleLLocation = RandomPoint(UrnHandleLTexture);
+            UrnHandleRLocation = RandomPoint(UrnHandleRTexture);
+            UrnCenterLocation = RandomPoint(UrnCenterTexture);
         }
 
-        private Vector2 RandomPoint()
+        private Vector2 RandomPoint(Texture2D texture)
         {
-            return new Vector2((float)random.NextDouble() * BackgroundBuffer.X, (float)random.NextDouble() * BackgroundBuffer.Y);
+            var x = (float)random.NextDouble() * BackgroundBuffer.X;
+            var y = (float)random.NextDouble() * BackgroundBuffer.Y;
+
+            if(x <= 30f) {
+                x = 30f;
+            } else if(x > (BackgroundBuffer.X - (30 - texture.Width)))
+            {
+                x = BackgroundBuffer.X - 30f - texture.Width;
+            }
+
+            if(y <= 30)
+            {
+                y = 30f;
+            } else if (y > BackgroundBuffer.Y - 30 - texture.Height)
+            {
+                y = BackgroundBuffer.Y - 30 - texture.Height;
+            }
+
+            Debug.WriteLine(texture.Name + " " + x + " " + y);
+            return new Vector2(x, y);
         }
 
         public void CheckCollisions(Eyes eyes)
@@ -137,6 +157,24 @@ namespace HauntedHouse
                 return true;
             }
             return false;
+        }
+
+        public int PiecesFound()
+        {
+            var i = 0;
+            if(UrnCenterIsFound == true)
+            {
+                i = i + 1;
+            }
+            if (UrnHandleLIsFound == true)
+            {
+                i = i + 1;
+            }
+            if (UrnHandleRIsFound == true)
+            {
+                i = i + 1;
+            }
+            return i;
         }
 
     }
