@@ -55,8 +55,10 @@ namespace HauntedHouse
 
             //create a Room;
             room = new Room(backgroundBuffer);
-            room.AddWall(new Vector2(backgroundBuffer.X / 2f, backgroundBuffer.Y / 2f), Content.Load<Texture2D>("walls/vertical-wall"));
-            
+            var vwall = Content.Load<Texture2D>("walls/vertical-wall");
+            room.AddWall(new Vector2(0,0), vwall);
+            room.AddWall(new Vector2(backgroundBuffer.X - vwall.Width, 0), Content.Load<Texture2D>("walls/vertical-wall"));
+
             //Load Urn Textures
             var urnTextures = new Texture2D[]
             {
@@ -252,7 +254,7 @@ namespace HauntedHouse
                 null,
                 Color.White,
                 0f,
-                new Vector2(eyes.CurrentTexture.Width / 2, eyes.CurrentTexture.Height / 2),
+                new Vector2(0,0),
                 Vector2.One,
                 SpriteEffects.None,
                 0f);
@@ -328,7 +330,7 @@ namespace HauntedHouse
                     null,
                     Color.White,
                     0f,
-                    new Vector2(wall.texture.Width / 2f, wall.texture.Height / 2f),
+                    new Vector2(0,0),
                     Vector2.One,
                     SpriteEffects.None,
                     0f);
@@ -367,25 +369,24 @@ namespace HauntedHouse
             else if (kstate.IsKeyDown(Keys.Left))
             {
                 eyes.CurrentTexture = eyes.Textures[3];
-                if (eyes.Location.X - eyes.CurrentTexture.Width / 2f > 0)
+                var nextX = eyes.Location.X - eyes.Speed * seconds;
+                var nextRectangle = eyes.GetBoundingBox();
+                nextRectangle.X = (int)nextX;
+                if (room.checkCollisions(nextRectangle) == false)
                 {
-                    eyes.Location.X -= eyes.Speed * seconds;
-                }
-                else
-                {
-                    eyes.Location.X = 0 + eyes.CurrentTexture.Width / 2f;
+                    eyes.Location.X = nextX;
                 }
             }
             else if (kstate.IsKeyDown(Keys.Right))
             {
                 eyes.CurrentTexture = eyes.Textures[4];
-                if (eyes.Location.X + eyes.CurrentTexture.Width / 2f < eyes.BackgroundBuffer.X)
+
+                var nextX = eyes.Location.X + eyes.Speed * seconds;
+                var nextRectangle = eyes.GetBoundingBox();
+                nextRectangle.X = (int)nextX;
+                if(room.checkCollisions(nextRectangle) == false)
                 {
-                    eyes.Location.X += eyes.Speed * seconds;
-                }
-                else
-                {
-                    eyes.Location.X = eyes.BackgroundBuffer.X - eyes.CurrentTexture.Width / 2f;
+                    eyes.Location.X = nextX;
                 }
             }
             else

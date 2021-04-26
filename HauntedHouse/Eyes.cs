@@ -26,7 +26,7 @@ namespace HauntedHouse
             this.CurrentTexture = Textures[0];
             this.MatchIsLit = false;
             this.MatchTexture = textures[5];
-            this.Location = new Vector2(CurrentTexture.Width / 2f, CurrentTexture.Height / 2f);
+            this.Location = new Vector2(BackgroundBuffer.X / 2f, BackgroundBuffer.Y / 2f);
         }
 
         public Rectangle GetBoundingBox()
