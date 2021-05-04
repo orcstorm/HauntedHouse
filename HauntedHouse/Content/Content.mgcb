@@ -175,6 +175,18 @@
 /processorParam:TextureFormat=Color
 /build:Urn-Handle-R.png
 
+#begin walls/horizontal-wall.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:walls/horizontal-wall.png
+
 #begin walls/vertical-wall.png
 /importer:TextureImporter
 /processor:TextureProcessor

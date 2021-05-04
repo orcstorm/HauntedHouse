@@ -10,11 +10,13 @@ namespace HauntedHouse
     {
         public List<Wall> walls;
         public Vector2 backgroundBuffer;
+        public int id;
         
-        public Room(Vector2 backgroundBuffer)
+        public Room(Vector2 backgroundBuffer, int id)
         {
             this.backgroundBuffer = backgroundBuffer;
             this.walls = new List<Wall> { };
+            this.id = id;
         }
 
         public void AddWall(Vector2 location, Texture2D texture)

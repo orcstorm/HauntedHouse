@@ -25,8 +25,10 @@ namespace HauntedHouse
         private SoundEffectInstance soundEffectInstance3;
         private SoundEffectInstance soundEffectInstance4;
         private SoundEffectInstance currentSoundEffect;
-        private Room room;
-
+        private Texture2D vwall;
+        private Texture2D hwall;
+        private Room currentRoom;
+        private Vector2 backgroundBuffer;
 
         public HauntedHouseGame()
         {
@@ -38,7 +40,7 @@ namespace HauntedHouse
         protected override void Initialize()
         {
             backgroundColor = Color.Black;
-            var backgroundBuffer = new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            backgroundBuffer = new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
 
             // Load Eye Textures
             var eye_textures = new Texture2D[]{ 
@@ -54,11 +56,11 @@ namespace HauntedHouse
             eyes = new Eyes(eye_textures, backgroundBuffer, 500f);
 
             //create a Room;
-            room = new Room(backgroundBuffer);
-            var vwall = Content.Load<Texture2D>("walls/vertical-wall");
-            room.AddWall(new Vector2(0,0), vwall);
-            room.AddWall(new Vector2(backgroundBuffer.X - vwall.Width, 0), Content.Load<Texture2D>("walls/vertical-wall"));
-
+            vwall = Content.Load<Texture2D>("walls/vertical-wall");
+            hwall = Content.Load<Texture2D>("walls/horizontal-wall");
+            currentRoom = GetRoom1();
+            
+            
             //Load Urn Textures
             var urnTextures = new Texture2D[]
             {
@@ -111,7 +113,6 @@ namespace HauntedHouse
                     //play an audio effect based on how many pieces have been found
                     if(currentSoundEffect.State == SoundState.Stopped)
                     {
-                       
                         switch (piecesFound)
                         {
                             case 0:
@@ -152,6 +153,9 @@ namespace HauntedHouse
 
                     //update the eye location and texture
                     UpdateEyes(gameTime, kstate);
+
+                    //check if we've left the room
+                    CheckRoomLeft();
 
                     break;
                 case GameStates.Paused:
@@ -254,7 +258,7 @@ namespace HauntedHouse
                 null,
                 Color.White,
                 0f,
-                new Vector2(0,0),
+                new Vector2(eyes.CurrentTexture.Width / 2f, eyes.CurrentTexture.Height / 2f),
                 Vector2.One,
                 SpriteEffects.None,
                 0f);
@@ -322,7 +326,7 @@ namespace HauntedHouse
 
         private void DrawWalls()
         {
-            foreach(Wall wall in room.walls)
+            foreach(Wall wall in currentRoom.walls)
             {
                 _spriteBatch.Draw(
                     wall.texture,
@@ -352,17 +356,32 @@ namespace HauntedHouse
             if (kstate.IsKeyDown(Keys.Up))
             {
                 eyes.CurrentTexture = eyes.Textures[1];
-                if (eyes.Location.Y - eyes.CurrentTexture.Height > 0)
+                var nextY = eyes.Location.Y - eyes.Speed * seconds;
+                var nextRectangle = eyes.GetBoundingBox();
+                nextRectangle.Y = (int)(nextY - eyes.CurrentTexture.Height / 2f);
+                nextRectangle.X = (int)(nextRectangle.X - eyes.CurrentTexture.Width / 2f);
+                if (currentRoom.checkCollisions(nextRectangle) == false)
                 {
-                    eyes.Location.Y -= eyes.Speed * seconds;
+                    eyes.Location.Y = nextY;
+                } else
+                {
+                    eyes.Location.Y = hwall.Height + eyes.CurrentTexture.Height / 2f;
                 }
             }
             else if (kstate.IsKeyDown(Keys.Down))
             {
                 eyes.CurrentTexture = eyes.Textures[2];
-                if (eyes.Location.Y + eyes.CurrentTexture.Height < eyes.BackgroundBuffer.Y)
+                var nextY = eyes.Location.Y + eyes.Speed * seconds;
+                var nextRectangle = eyes.GetBoundingBox();
+                nextRectangle.Y = (int)(nextY + eyes.CurrentTexture.Height / 2f);
+                nextRectangle.X = (int)(nextRectangle.X - eyes.CurrentTexture.Width / 2f);
+                if (currentRoom.checkCollisions(nextRectangle) == false)
                 {
-                    eyes.Location.Y += eyes.Speed * seconds;
+                    eyes.Location.Y = nextY;
+                } else
+                {
+                    eyes.Location.Y = _graphics.PreferredBackBufferHeight - hwall.Height - eyes.CurrentTexture.Height / 2f;
+                
                 }
 
             }
@@ -371,8 +390,8 @@ namespace HauntedHouse
                 eyes.CurrentTexture = eyes.Textures[3];
                 var nextX = eyes.Location.X - eyes.Speed * seconds;
                 var nextRectangle = eyes.GetBoundingBox();
-                nextRectangle.X = (int)nextX;
-                if (room.checkCollisions(nextRectangle) == false)
+                nextRectangle.X = (int)(nextX - eyes.CurrentTexture.Width / 2f);
+                if (currentRoom.checkCollisions(nextRectangle) == false)
                 {
                     eyes.Location.X = nextX;
                 }
@@ -380,11 +399,10 @@ namespace HauntedHouse
             else if (kstate.IsKeyDown(Keys.Right))
             {
                 eyes.CurrentTexture = eyes.Textures[4];
-
                 var nextX = eyes.Location.X + eyes.Speed * seconds;
                 var nextRectangle = eyes.GetBoundingBox();
-                nextRectangle.X = (int)nextX;
-                if(room.checkCollisions(nextRectangle) == false)
+                nextRectangle.X = (int)(nextX - eyes.CurrentTexture.Width / 2f);
+                if (currentRoom.checkCollisions(nextRectangle) == false)
                 {
                     eyes.Location.X = nextX;
                 }
@@ -398,6 +416,68 @@ namespace HauntedHouse
             {
                 eyes.MatchIsLit = true;
                 eyes.MatchLitTick = ticks;
+            }
+        }
+
+        private Room GetRoom1()
+        {
+            var room = new Room(backgroundBuffer, 1);
+            
+            room.AddWall(new Vector2(0, 0), vwall);
+            room.AddWall(new Vector2(0, backgroundBuffer.Y * 0.333f), vwall);
+            room.AddWall(new Vector2(0, backgroundBuffer.Y * 0.666f), vwall);
+            var voffset = backgroundBuffer.X - vwall.Width;
+            room.AddWall(new Vector2(voffset, 0), vwall);
+            room.AddWall(new Vector2(voffset, backgroundBuffer.Y * 0.666f), vwall);
+
+            room.AddWall(new Vector2(0, 0), hwall);
+            room.AddWall(new Vector2(backgroundBuffer.X * 0.333f, 0), hwall);
+            room.AddWall(new Vector2(backgroundBuffer.X * 0.666f, 0), hwall);
+            var hoffset = backgroundBuffer.Y - hwall.Height;
+            room.AddWall(new Vector2(0, hoffset), hwall);
+            room.AddWall(new Vector2(backgroundBuffer.X * 0.666f, hoffset), hwall);
+
+            return room;
+        }
+
+        private Room GetRoom2()
+        {
+            var room = new Room(backgroundBuffer, 2);
+
+            room.AddWall(new Vector2(0, 0), vwall);
+            room.AddWall(new Vector2(0, backgroundBuffer.Y * 0.666f), vwall);
+            var voffset = backgroundBuffer.X - vwall.Width;
+            room.AddWall(new Vector2(voffset, 0), vwall);
+            room.AddWall(new Vector2(voffset, backgroundBuffer.Y * 0.333f), vwall);
+            room.AddWall(new Vector2(voffset, backgroundBuffer.Y * 0.666f), vwall);
+
+            room.AddWall(new Vector2(0, 0), hwall);
+            room.AddWall(new Vector2(backgroundBuffer.X * 0.333f, 0), hwall);
+            room.AddWall(new Vector2(backgroundBuffer.X * 0.666f, 0), hwall);
+            var hoffset = backgroundBuffer.Y - hwall.Height;
+            room.AddWall(new Vector2(0, hoffset), hwall);
+            room.AddWall(new Vector2(backgroundBuffer.X * 0.666f, hoffset), hwall);
+
+            return room;
+        }
+
+        private void CheckRoomLeft()
+        {
+            switch(currentRoom.id) {
+                case 1:
+                    if(eyes.Location.X > backgroundBuffer.X)
+                    {
+                        currentRoom = GetRoom2();
+                        eyes.Location.X = 0;
+                    }
+                    break;
+                case 2:
+                    if (eyes.Location.X < 0)
+                    {
+                        currentRoom = GetRoom1();
+                        eyes.Location.X = backgroundBuffer.X;
+                    }
+                    break;
             }
         }
 
